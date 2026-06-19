@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naty's Brand Retainer Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Token Tracker - Fixed Corner */
+        .token-tracker {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 300px;
+            z-index: 1000;
+            border-left: 4px solid #667eea;
+        }
+
+        .token-tracker-header {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .token-tracker-title {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .token-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #999;
+        }
+
+        .token-stats {
+            font-size: 12px;
+            line-height: 1.8;
+            color: #666;
+        }
+
+        .token-stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .token-stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .token-amount {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .token-warning {
+            margin-top: 10px;
+            padding: 8px;
+            background: #fff3cd;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #856404;
+            display: none;
+        }
+
+        .token-warning.show {
+            display: block;
+        }
+
+        .token-reset-btn {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .token-reset-btn:hover {
+            background: #e8e8e8;
+            border-color: #bbb;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #667eea;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .tab-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .month-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+        }
+
+        .month-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #667eea;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+
+        .month-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .month-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: transparent;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .brand-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .status-item div:first-child {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .status-item div:last-child {
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .email-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .email-log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .email-log-header {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .email-log-body {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .email-log-meta {
+            font-size: 11px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .token-tracker {
+                bottom: 10px;
+                right: 10px;
+                max-width: calc(100% - 20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Token Tracker Widget (Fixed Corner) - NOW IN USD -->
+    <div class="token-tracker" id="tokenTracker">
+        <div class="token-tracker-header">
+            <div class="token-tracker-title">
+                💰 API Cost
+            </div>
+            <button class="token-close" onclick="toggleTokenTracker()">−</button>
+        </div>
+        <div class="token-stats">
+            <div class="token-stat-row">
+                <span>Gmail Sends:</span>
+                <span class="token-amount" id="tokenGmailSends">$0.0000</span>
+            </div>
+            <div class="token-stat-row">
+                <span>Sheets API:</span>
+                <span class="token-amount" id="tokenSheets">$0.0016</span>
+            </div>
+            <div class="token-stat-row">
+                <span>Gmail Reads:</span>
+                <span class="token-amount" id="tokenGmailReads">$0.0000</span>
+            </div>
+            <div class="token-stat-row" style="border-top: 2px solid #667eea; padding-top: 8px; margin-top: 8px; font-weight: 600;">
+                <span>Total Cost</span>
+                <span class="token-amount" id="tokenTotal">$0.0090</span>
+            </div>
+        </div>
+        <div class="token-warning" id="tokenWarning">
+            ⚠️ Approaching budget limit!
+        </div>
+        <button class="token-reset-btn" onclick="resetTokenTracker()">Reset Counter</button>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💼 Naty's Brand Retainer Dashboard</h1>
+            <div class="header-info">
+                Email: nathalia.rsocials@gmail.com | Rate: $200-300/video | Monthly Goal: $3,000+ per deal
+            </div>
+            
+            <div class="header-stats">
+                <div class="stat-card">
+                    <h3>Total Brands (All Time)</h3>
+                    <div class="value" id="totalBrands">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>This Month Revenue</h3>
+                    <div class="value" id="monthRevenue">$0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total All Months</h3>
+                    <div class="value" id="totalRevenue">$0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Emails Sent</h3>
+                    <div class="value" id="emailsSent">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('brands')">📋 BRANDS</button>
+            <button class="tab-btn" onclick="switchTab('emails')">📧 EMAILS</button>
+        </div>
+
+        <!-- BRANDS TAB -->
+        <div id="brands" class="tab-content active">
+            <!-- Month Tabs -->
+            <div class="card">
+                <h3 style="margin-bottom: 15px; color: #333;">Select Month:</h3>
+                <div class="month-tabs" id="monthTabs"></div>
+            </div>
+
+            <!-- Search -->
+            <div class="card" style="padding-bottom: 0;">
+                <div class="search-box">
+                    <input type="text" id="searchBox" placeholder="🔍 Search brands by name or status...">
+                </div>
+            </div>
+
+            <!-- Brand Table -->
+            <div class="card">
+                <h2 id="monthTitle">📋 All Retainers - June 26</h2>
+                <div class="table-container">
+                    <table id="brandTable">
+                        <thead>
+                            <tr>
+                                <th>Brand Name</th>
+                                <th>Pay Rate</th>
+                                <th>Videos</th>
+                                <th>Total Videos</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody id="brandBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Status Breakdown -->
+            <div class="card">
+                <h2>📊 Status Breakdown</h2>
+                <div class="status-grid">
+                    <div class="status-item" style="background: #d1e7dd; color: #0f5132;">
+                        <div id="statusApproved">0</div>
+                        <div>Approved</div>
+                    </div>
+                    <div class="status-item" style="background: #fff3cd; color: #856404;">
+                        <div id="statusPending">0</div>
+                        <div>Pending</div>
+                    </div>
+                    <div class="status-item" style="background: #cfe2ff; color: #084298;">
+                        <div id="statusDraft">0</div>
+                        <div>Draft</div>
+                    </div>
+                    <div class="status-item" style="background: #e2e3e5; color: #383d41;">
+                        <div id="statusOther">0</div>
+                        <div>Other</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMAILS TAB -->
+        <div id="emails" class="tab-content">
+            <div class="card">
+                <h2>✉️ Outreach Summary</h2>
+                <div style="font-size: 16px; line-height: 2;">
+                    <p><strong>📧 Emails Sent:</strong> <span id="emailsTotal" style="color: #667eea; font-weight: bold;">23</span></p>
+                    <p><strong>💰 API Cost:</strong> <span id="costDisplay" style="color: #667eea; font-weight: bold;">$0.0090</span></p>
+                    <p><strong>Status:</strong> All sent successfully</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Cost Tracking - IN USD
+        let apiCost = {
+            gmailSends: 0.00736,  // 23 sends × $0.00032
+            gmailReads: 0.000,    // No reads yet
+            sheets: 0.0016        // 8 reads × $0.0002
+        };
+
+        function updateCostDisplay() {
+            const total = apiCost.gmailSends + apiCost.gmailReads + apiCost.sheets;
+            
+            document.getElementById('tokenGmailSends').textContent = '$' + apiCost.gmailSends.toFixed(4);
+            document.getElementById('tokenGmailReads').textContent = '$' + apiCost.gmailReads.toFixed(4);
+            document.getElementById('tokenSheets').textContent = '$' + apiCost.sheets.toFixed(4);
+            document.getElementById('tokenTotal').textContent = '$' + total.toFixed(4);
+            document.getElementById('costDisplay').textContent = '$' + total.toFixed(4);
+            
+            // Show warning if over $0.05
+            const warning = document.getElementById('tokenWarning');
+            if (total > 0.05) {
+                warning.classList.add('show');
+            } else {
+                warning.classList.remove('show');
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('apiCost', JSON.stringify(apiCost));
+        }
+
+        function resetTokenTracker() {
+            apiCost = {
+                gmailSends: 0.0,
+                gmailReads: 0.0,
+                sheets: 0.0
+            };
+            updateCostDisplay();
+            alert('✅ Cost counter reset!');
+        }
+
+        function toggleTokenTracker() {
+            const tracker = document.getElementById('tokenTracker');
+            const stats = tracker.querySelector('.token-stats');
+            stats.style.display = stats.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Load saved cost
+        function loadCostData() {
+            const saved = localStorage.getItem('apiCost');
+            if (saved) {
+                apiCost = JSON.parse(saved);
+            }
+            updateCostDisplay();
+        }
+
+        // Embedded data
+        const allData = {"MAR 26": [{"brandName": "Rainbow nutrients hair growth", "startDate": "", "finishDate": "$2,000", "payRate": "12", "videosPerWeek": "30", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "Wholesome collagen", "startDate": "", "finishDate": "$1,500", "payRate": "30", "videosPerWeek": "30", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "belli welli", "startDate": "", "finishDate": "$2,500", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Finished", "status": "https://docs.google.com/spreadsheets/d/1e0Dy6RDNVP12-JdcV0ZR_XL_t9koZP5cGUJ16bGvB8w/edit?usp=sharing", "contact": "", "notes": ""}, {"brandName": "TYMO hair curler", "startDate": "", "finishDate": "$600", "payRate": "3", "videosPerWeek": "3", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "Zivvy", "startDate": "", "finishDate": "$1,500", "payRate": "15", "videosPerWeek": "15", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "snow", "startDate": "", "finishDate": "$1,200", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Finished", "status": "", "contact": "", "notes": ""}, {"brandName": "Cheeky bonsai", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "UPSA gummies/ electrolytes", "startDate": "", "finishDate": "$3,000", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "Breeze NU", "startDate": "", "finishDate": "$400", "payRate": "1", "videosPerWeek": "1", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "Lilyeve", "startDate": "", "finishDate": "$500", "payRate": "2", "videosPerWeek": "2", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "Skin1004", "startDate": "", "finishDate": "$500", "payRate": "3", "videosPerWeek": "3", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "peach slices", "startDate": "", "finishDate": "$2,000", "payRate": "12", "videosPerWeek": "12", "totalVideos": "Payed", "status": "https://dkv35aqnlp5.typeform.com/to/BvmWRoeg?typeform-source=t.yesware.com", "contact": "", "notes": ""}, {"brandName": "ukliss", "startDate": "", "finishDate": "$600", "payRate": "3", "videosPerWeek": "3", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "Vertvie", "startDate": "", "finishDate": "$1,000", "payRate": "6", "videosPerWeek": "6", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "oxyenergy", "startDate": "", "finishDate": "$2,000", "payRate": "5", "videosPerWeek": "10", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "dr.Squatch", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Finished", "status": "", "contact": "", "notes": ""}, {"brandName": "kivvy", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "Drink Vuum", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "10", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$27,300", "payRate": "162", "videosPerWeek": "185", "totalVideos": "", "status": "", "contact": "", "notes": ""}], "APRIL 26": [{"brandName": "inner brightness magnesium bra", "startDate": "", "finishDate": "$400", "payRate": "1", "videosPerWeek": "1", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "essenciel", "startDate": "", "finishDate": "$1,000", "payRate": "4", "videosPerWeek": "", "totalVideos": "Waiting Item", "status": "", "contact": "", "notes": ""}, {"brandName": "TSUYAGLA", "startDate": "", "finishDate": "$1,500", "payRate": "5", "videosPerWeek": "2", "totalVideos": "In Progress", "status": "http://url7871.creator.noxinfluencer.com/ls/click?upn=u001.x38MKs5dFWv60-2BkXGWfimYgdfO-2FhO-2B-2BA1odEQFW8lbx6kldVo92oC0stPUCXRah8OwL3XktTROwGpfAdhDxJLcJ7BkT-2FzS66pitErLfvdFA-3DbAQM_giZjMhFkNXIJMIj7d1lxYm2UOgphD-2FThWkpHsXdveOwA-2Fmqz44fphuMTLqxhQCbbn0WAueOMkrua14R-2BrYRgsNHPpE5HQujxGp3McHeDwN1Sp3XAu9B5DUsT5kcHkz455VrZScNyuvaTA5cOpmzfIQyhVUgmKMGph5aS9mx15vdlLPM9oq89kL1tj-2FOLidPE82X-2Bofqe7EXyfloToadHgtOH5Pqt-2BA7p5VxtP1SGqmhwgJfOd-2FaRSoO5smZleqS2BNKjO2XlKB7S6B6FUgWwnXNitNlLqfFxk2TAtDagLclvxk9yns2Y9xS8dpoKQdgCOcQKuGFYJJiuV3jVJZQvYg-3D-3D", "contact": "", "notes": ""}, {"brandName": "\u2022\u2022gear by gash (jessica miller)", "startDate": "", "finishDate": "$800", "payRate": "1", "videosPerWeek": "1", "totalVideos": "Finished", "status": "https://www.notion.so/GBG-Creator-Brief-Upgraded-32920a657edb807f8306e6f83335f35e?source=copy_link", "contact": "", "notes": ""}, {"brandName": "clean nutra", "startDate": "", "finishDate": "$4,000", "payRate": "15", "videosPerWeek": "12", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "ogancell glass cell shine mage", "startDate": "", "finishDate": "$2,000", "payRate": "5", "videosPerWeek": "", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "the honey pot co.", "startDate": "", "finishDate": "$4,000", "payRate": "15", "videosPerWeek": "15", "totalVideos": "Finished", "status": "", "contact": "", "notes": ""}, {"brandName": "vertvie", "startDate": "", "finishDate": "$1,200", "payRate": "8", "videosPerWeek": "8", "totalVideos": "Finished", "status": "", "contact": "", "notes": ""}, {"brandName": "Faye", "startDate": "", "finishDate": "$500", "payRate": "3", "videosPerWeek": "3", "totalVideos": "Finished", "status": "", "contact": "", "notes": ""}, {"brandName": "pura vida", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "8", "totalVideos": "In Progress", "status": "https://docs.google.com/spreadsheets/d/17Iv4W-lSFsFK1WKD9ZmVIEE8POkWZpyF6NUn5I2qGuU/edit?usp=sharing", "contact": "", "notes": ""}, {"brandName": "As fairy", "startDate": "", "finishDate": "$4,000", "payRate": "15", "videosPerWeek": "11", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "cheeky bonsai", "startDate": "https://www.tiktok.com/@nathaliarestrepod/video/7627221393477864735?shop_", "finishDate": "$550", "payRate": "2", "videosPerWeek": "1", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$21,950", "payRate": "84", "videosPerWeek": "62", "totalVideos": "", "status": "", "contact": "", "notes": ""}], "MAY 26": [{"brandName": "skintific messages", "startDate": "", "finishDate": "$1,100", "payRate": "4", "videosPerWeek": "4", "totalVideos": "In Progress", "status": "messages", "contact": "", "notes": ""}, {"brandName": "inertia feminine pads", "startDate": "", "finishDate": "$1,000", "payRate": "5", "videosPerWeek": "5", "totalVideos": "Finished", "status": "mail", "contact": "", "notes": ""}, {"brandName": "ILSO", "startDate": "https://www.notion.so/2605-ILSO_TTS-AF-Guide-34af052f95f9806caf49da0e0e43810b?source=copy_link", "finishDate": "$1,200", "payRate": "2", "videosPerWeek": "2", "totalVideos": "In Progress", "status": "mail", "contact": "", "notes": ""}, {"brandName": "celladix", "startDate": "", "finishDate": "$1,300", "payRate": "5", "videosPerWeek": "", "totalVideos": "Waiting Item", "status": "mail", "contact": "", "notes": ""}, {"brandName": "Dr. Tuoma", "startDate": "", "finishDate": "$1,000", "payRate": "4", "videosPerWeek": "4", "totalVideos": "Payed", "status": "WhatsApp", "contact": "", "notes": ""}, {"brandName": "kristen Yang Sheglam", "startDate": "", "finishDate": "$1,300", "payRate": "5", "videosPerWeek": "2", "totalVideos": "In Progress", "status": "Kristen.Yang@sheglam.com", "contact": "", "notes": ""}, {"brandName": "inno mint", "startDate": "", "finishDate": "$300", "payRate": "2", "videosPerWeek": "1", "totalVideos": "In Progress", "status": "mail", "contact": "", "notes": ""}, {"brandName": "cuixi@vipstreamers.com", "startDate": "", "finishDate": "$600", "payRate": "per vidoes", "videosPerWeek": "", "totalVideos": "Pending Leads", "status": "", "contact": "", "notes": ""}, {"brandName": "pumiey lacey", "startDate": "", "finishDate": "$500", "payRate": "3", "videosPerWeek": "", "totalVideos": "Pending Leads", "status": "", "contact": "", "notes": ""}, {"brandName": "BB LAB", "startDate": "", "finishDate": "$3,000", "payRate": "10", "videosPerWeek": "3", "totalVideos": "In Progress", "status": "EMAIL", "contact": "", "notes": ""}, {"brandName": "twice", "startDate": "", "finishDate": "$1,000", "payRate": "4", "videosPerWeek": "", "totalVideos": "Signed Contract", "status": "", "contact": "", "notes": ""}, {"brandName": "inner brightness mouthwash", "startDate": "", "finishDate": "$400", "payRate": "1", "videosPerWeek": "1", "totalVideos": "Payed", "status": "", "contact": "", "notes": ""}, {"brandName": "magic relax", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "7", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "peach slices", "startDate": "", "finishDate": "$750", "payRate": "5", "videosPerWeek": "5", "totalVideos": "Finished", "status": "", "contact": "", "notes": ""}, {"brandName": "Kivvy", "startDate": "", "finishDate": "$2,000", "payRate": "10", "videosPerWeek": "", "totalVideos": "In Progress", "status": "", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$17,450", "payRate": "70", "videosPerWeek": "34", "totalVideos": "", "status": "", "contact": "", "notes": ""}], "JUNE 26": [{"brandName": "celimax", "startDate": "Retinal Shot Tightening Booster + Pore & Dark Spot Brightening Cream (DUO SET) Guideline", "finishDate": "Pore & Dark Spot Brightening Cream Mask Guidelines", "payRate": "$900", "videosPerWeek": "3", "totalVideos": "", "status": "In Progress", "contact": "sea@celimax.co.kr", "notes": ""}, {"brandName": "luckymeey", "startDate": "", "finishDate": "", "payRate": "$400", "videosPerWeek": "2", "totalVideos": "", "status": "In Progress", "contact": "yut772634@gmail.com", "notes": ""}, {"brandName": "UGC celeste D'or Curve", "startDate": "", "finishDate": "", "payRate": "$1,000", "videosPerWeek": "4", "totalVideos": "", "status": "In Progress", "contact": "collab@celeste-dor.com", "notes": ""}, {"brandName": "FULLY", "startDate": "https://adapt-us.my.canva.site/guideline-green-tomato-clay-mask-cleanser", "finishDate": "", "payRate": "$3,500", "videosPerWeek": "15", "totalVideos": "5", "status": "In Progress", "contact": "jennyylee@adaptkorea.com", "notes": ""}, {"brandName": "G4free", "startDate": "", "finishDate": "", "payRate": "$1,300", "videosPerWeek": "5", "totalVideos": "5", "status": "Finished", "contact": "5023191903", "notes": ""}, {"brandName": "Zdeer", "startDate": "", "finishDate": "", "payRate": "$1,000", "videosPerWeek": "3", "totalVideos": "", "status": "Waiting Item", "contact": "maxinyao446@gmail.com", "notes": ""}, {"brandName": "Benis WhatsApp", "startDate": "", "finishDate": "", "payRate": "$1,800", "videosPerWeek": "8", "totalVideos": "", "status": "Pending Leads", "contact": "benis.outfits@gmail.com", "notes": ""}, {"brandName": "Dr. Tuoma", "startDate": "", "finishDate": "", "payRate": "$1,500", "videosPerWeek": "6", "totalVideos": "", "status": "In Progress", "contact": "", "notes": ""}, {"brandName": "CeeLike", "startDate": "", "finishDate": "", "payRate": "$1,000", "videosPerWeek": "5", "totalVideos": "", "status": "Waiting Item", "contact": "", "notes": ""}, {"brandName": "Peach slices", "startDate": "", "finishDate": "", "payRate": "$1,500", "videosPerWeek": "10", "totalVideos": "", "status": "In Progress", "contact": "", "notes": ""}, {"brandName": "Eqqual berry", "startDate": "https://streamstrudel.my.canva.site/vita-duo-brief", "finishDate": "", "payRate": "$3,000", "videosPerWeek": "5", "totalVideos": "", "status": "Pending Leads", "contact": "eqb@streamstrudel.com", "notes": ""}, {"brandName": "Plantifique", "startDate": "", "finishDate": "", "payRate": "$700", "videosPerWeek": "3", "totalVideos": "", "status": "Pending Leads", "contact": "andreea@plantifique.com", "notes": ""}, {"brandName": "misspep", "startDate": "", "finishDate": "", "payRate": "$900", "videosPerWeek": "3", "totalVideos": "", "status": "", "contact": "cfy1262750701@gmail.com", "notes": ""}, {"brandName": "TYMO", "startDate": "", "finishDate": "", "payRate": "$600", "videosPerWeek": "2", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Breeze NU", "startDate": "", "finishDate": "", "payRate": "$3,000", "videosPerWeek": "10", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Mung bean skincare", "startDate": "", "finishDate": "", "payRate": "$1,000", "videosPerWeek": "5", "totalVideos": "", "status": "", "contact": "hyeri@momentsco.com", "notes": ""}, {"brandName": "eqqual berry", "startDate": "", "finishDate": "", "payRate": "$3,800", "videosPerWeek": "10", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "fall sweet", "startDate": "", "finishDate": "", "payRate": "$1,000", "videosPerWeek": "5", "totalVideos": "", "status": "", "contact": "contact@fallsweet.com", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "", "payRate": "$27,900", "videosPerWeek": "104", "totalVideos": "10", "status": "", "contact": "", "notes": ""}], "JULY 26": [{"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}], "AUG 26": [{"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}], "SEP 26": [{"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}, {"brandName": "Brand Name", "startDate": "Finish Date", "finishDate": "Pay Rate", "payRate": "# of videos", "videosPerWeek": "Total of Videos", "totalVideos": "Status", "status": "Contact", "contact": "", "notes": ""}, {"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}], "OCT 26": [{"brandName": "TOTAL", "startDate": "", "finishDate": "$0", "payRate": "0", "videosPerWeek": "0", "totalVideos": "", "status": "", "contact": "", "notes": ""}]};
+        let currentMonth = null;
+        let filteredData = [];
+
+        const months = ['MAR 26', 'APRIL 26', 'MAY 26', 'JUNE 26', 'JULY 26', 'AUG 26', 'SEP 26', 'OCT 26'];
+
+        function init() {
+            loadCostData();
+            setupMonthTabs();
+            selectCurrentMonth();
+            updateDashboard();
+            document.getElementById('emailsTotal').textContent = '23';
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function setupMonthTabs() {
+            const tabsContainer = document.getElementById('monthTabs');
+            tabsContainer.innerHTML = '';
+            
+            months.forEach(month => {
+                if (allData[month] && allData[month].length > 0) {
+                    const btn = document.createElement('button');
+                    btn.className = `month-btn ${month === currentMonth ? 'active' : ''}`;
+                    btn.textContent = month;
+                    btn.onclick = () => switchMonth(month);
+                    tabsContainer.appendChild(btn);
+                }
+            });
+        }
+
+        function selectCurrentMonth() {
+            for (let month of ['JUNE 26', 'MAY 26', 'APRIL 26']) {
+                if (allData[month] && allData[month].length > 0) {
+                    currentMonth = month;
+                    return;
+                }
+            }
+            for (let month of months) {
+                if (allData[month] && allData[month].length > 0) {
+                    currentMonth = month;
+                    return;
+                }
+            }
+        }
+
+        function switchMonth(month) {
+            currentMonth = month;
+            setupMonthTabs();
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const monthData = allData[currentMonth] || [];
+            filteredData = monthData;
+            
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === currentMonth) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            document.getElementById('monthTitle').textContent = `📋 All Retainers - ${currentMonth}`;
+            
+            updateStats(monthData);
+            updateBrandTable(monthData);
+            updateStatusBreakdown(monthData);
+        }
+
+        function updateStats(data) {
+            let totalBrands = 0;
+            let totalRevenue = 0;
+            let monthRevenue = 0;
+            
+            for (let month in allData) {
+                totalBrands += allData[month].length;
+                allData[month].forEach(item => {
+                    try {
+                        const rate = parseFloat(item.payRate.replace(/[\$,]/g, '')) || 0;
+                        totalRevenue += rate;
+                    } catch (e) {}
+                });
+            }
+            
+            data.forEach(item => {
+                try {
+                    const rate = parseFloat(item.payRate.replace(/[\$,]/g, '')) || 0;
+                    monthRevenue += rate;
+                } catch (e) {}
+            });
+            
+            document.getElementById('totalBrands').textContent = totalBrands;
+            document.getElementById('monthRevenue').textContent = `$${monthRevenue.toLocaleString()}`;
+            document.getElementById('totalRevenue').textContent = `$${totalRevenue.toLocaleString()}`;
+        }
+
+        function updateBrandTable(data) {
+            const tbody = document.getElementById('brandBody');
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No brands for this month</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td><span class="brand-name">${item.brandName}</span></td>
+                    <td>${item.payRate}</td>
+                    <td>${item.videosPerWeek}</td>
+                    <td>${item.totalVideos}</td>
+                    <td><span class="status-badge" style="background: #e2e3e5;">${item.status || 'N/A'}</span></td>
+                    <td>${item.startDate}</td>
+                    <td>${item.contact || '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStatusBreakdown(data) {
+            let approved = 0, pending = 0, draft = 0, other = 0;
+            
+            data.forEach(item => {
+                const s = (item.status || '').toLowerCase();
+                if (s.includes('approved')) approved++;
+                else if (s.includes('pending')) pending++;
+                else if (s.includes('draft')) draft++;
+                else other++;
+            });
+            
+            document.getElementById('statusApproved').textContent = approved;
+            document.getElementById('statusPending').textContent = pending;
+            document.getElementById('statusDraft').textContent = draft;
+            document.getElementById('statusOther').textContent = other;
+        }
+
+        document.getElementById('searchBox')?.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            
+            const filtered = filteredData.filter(item => 
+                (item.brandName || '').toLowerCase().includes(query) ||
+                (item.status || '').toLowerCase().includes(query) ||
+                (item.contact || '').toLowerCase().includes(query)
+            );
+            updateBrandTable(filtered);
+        });
+
+        init();
+    </script>
+</body>
+</html>
